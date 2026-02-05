@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "esnext",
+    "types": ["node", "@playwright/test"],
+    "moduleResolution": "bundler",
+    "strict": true,
+    "paths": {
+        "@fixtures/*": ["./fixtures/*"],
+        "@helpers/*": ["./helpers/*"],
+        "@objects/*": ["./objects/*"]
+    }
+  },
+  "include": ["./**/*.ts"]
+}
