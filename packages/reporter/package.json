@@ -1,0 +1,23 @@
+{
+  "name": "@quality-observability/playwright-reporter",
+  "version": "0.1.0",
+  "description": "Run-level observability reporter for Playwright test execution.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "dashboards",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.40.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  },
+  "license": "MIT"
+}

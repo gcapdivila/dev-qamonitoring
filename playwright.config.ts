@@ -26,7 +26,8 @@ export default defineConfig({
     // ['list'],
     ['html'],
     ['json', { outputFile: 'playwright-report/report.json' }],
-    ['./reporter/influx/index.ts', { strictTags: false, includeSuiteAll: false, includeDomainAll: false }],
+    //['./reporter/influx/index.ts', { strictTags: false, includeSuiteAll: false, includeDomainAll: false }],
+    ['@quality-observability/playwright-reporter', { measurement: 'pw_run', includeGlobalAll: true }]
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {

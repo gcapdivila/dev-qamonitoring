@@ -174,6 +174,7 @@ class InfluxReporter implements Reporter {
             tests_skipped: total.tests_skipped,
             duration_ms: wallClock, // wall clock is often more useful globally
             passrate,
+            run_started_ms: this.startedAt,
           },
           timestamp: ts,
         })

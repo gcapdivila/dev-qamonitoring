@@ -8,3 +8,5 @@ node_modules/
 /playwright/.auth/
 cmd
 .env
+quality-observability-playwright-reporter-0.1.0.tgz
+/packages/reporter/dist/
