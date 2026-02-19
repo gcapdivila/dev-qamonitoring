@@ -1,5 +1,9 @@
 import type { InfluxConfig } from "./types";
 
+export type WriteResult = 
+  | { status: "pushed" } 
+  | { status: "skipped"; reason: string }
+
 function resolveMode(cfg: InfluxConfig): "1" | "2" {
   if (cfg.mode === "1" || cfg.mode === "2") return cfg.mode;
   const has2 = !!(cfg.org && cfg.bucket && cfg.token);
@@ -44,13 +48,12 @@ async function postText(url: string, body: string, headers: Record<string, strin
   }
 }
 
-export async function writeLines(lines: string[]): Promise<void> {
+export async function writeLines(lines: string[]): Promise<WriteResult> {
   const cfg = getInfluxConfig();
   if (!cfg) {
-    console.warn("[InfluxReporter] INFLUX_URL missing -> skipping metrics push.");
-    return;
+    return { status: "skipped", reason: "INFLUX_URL missing" };
   }
-  if (lines.length === 0) return;
+  if (lines.length === 0) return { status: "skipped", reason: "No point generated" };
 
   const base = cfg.url.replace(/\/$/, "");
   const body = lines.join("\n");
@@ -58,8 +61,7 @@ export async function writeLines(lines: string[]): Promise<void> {
 
   if (mode === "1") {
     if (!cfg.db) {
-      console.warn("[InfluxReporter] INFLUX_DB missing for Influx 1.x -> skipping push.");
-      return;
+      return { status: "skipped", reason: "INFLUX_DB missing for Influx 1.x" };;
     }
     const params = new URLSearchParams({ db: cfg.db, precision: cfg.precision });
     if (cfg.rp) params.set("rp", cfg.rp);
@@ -68,13 +70,12 @@ export async function writeLines(lines: string[]): Promise<void> {
 
     const url = `${base}/write?${params.toString()}`;
     await postText(url, body, { "Content-Type": "text/plain; charset=utf-8" });
-    return;
+    return { status: "pushed" };
   }
 
   // Influx 2.x
   if (!cfg.org || !cfg.bucket || !cfg.token) {
-    console.warn("[InfluxReporter] INFLUX_ORG/BUCKET/TOKEN missing for Influx 2.x -> skipping push.");
-    return;
+    return { status: "skipped", reason: "INFLUX_ORG/BUCKET/TOKEN missing for Influx 2.x" };
   }
   const params = new URLSearchParams({
     org: cfg.org,
@@ -86,4 +87,6 @@ export async function writeLines(lines: string[]): Promise<void> {
     "Content-Type": "text/plain; charset=utf-8",
     Authorization: `Token ${cfg.token}`,
   });
+  
+  return { status: "pushed" };
 }

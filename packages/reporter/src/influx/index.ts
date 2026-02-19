@@ -10,7 +10,7 @@ import type {
 import type { Agg, ReporterOptions, RunKey } from "./types";
 import { extractDimsFromTags } from "./tags";
 import { toLineProtocol } from "./line-protocol";
-import { writeLines } from "./write";
+import { getInfluxConfig, writeLines } from "./write";
 import { makeRunId } from "./runId";
 
 function keyToString(k: RunKey): string {
@@ -34,6 +34,8 @@ class InfluxReporter implements Reporter {
   private precision: "ms" | "ns";
   private env: string;
   private runId: string = "";
+  private enabled = true;
+  private disabledReason: string | null = null;
 
   private startedAt = 0;
   private agg = new Map<string, { key: RunKey; agg: Agg }>();
@@ -52,9 +54,19 @@ class InfluxReporter implements Reporter {
     this.startedAt = nowMs();
     this.runId = makeRunId();
     console.log(`[InfluxReporter] run_id=${this.runId}`);
+
+    // Decline once: if influx config is missing, disable reporter entirely
+    const cfg = getInfluxConfig();
+    if (!cfg) {
+      this.enabled = false;
+      this.disabledReason = "Influx config missing (INFLUX_URL). Metrics disabled.";
+      console.warn(`[InfluxReporter] ${this.disabledReason}`);
+    }
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
+    if (!this.enabled) return;
+
     const project = test.parent.project();
     const app = project?.name ?? "unknown";
 
@@ -96,6 +108,12 @@ class InfluxReporter implements Reporter {
   }
 
   async onEnd(result: FullResult) {
+    if (!this.enabled) {
+      // One-line summary to avoid confusion.
+      console.log("[InfluxReporter] Metrics disabled. Nothing to push.");
+      return;
+    }
+
     // strict mode: if convention errors detected, fail fast
     if (this.strictTags && this.errors.size > 0) {
       const msg =
@@ -181,8 +199,13 @@ class InfluxReporter implements Reporter {
       );
     }
 
-    await writeLines(lines);
-    console.log(`[InfluxReporter] Pushed ${lines.length} points.`);
+    console.log(`[InfluxReporter] Generated ${lines.length} points.`);
+    const res = await writeLines(lines);
+    if (res.status === "pushed") {
+      console.log(`[InfluxReporter] Pushed ${lines.length} points.`);
+    } else {
+      console.warn(`[InfluxReporter] Skipped push: ${res.reason}`);
+    }
   }
 }
 
