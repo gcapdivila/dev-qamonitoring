@@ -90,15 +90,20 @@ class InfluxReporter implements Reporter {
       key: runKey,
       agg: {
         tests_total: 0,
+        tests_executed: 0,
         tests_passed: 0,
         tests_failed: 0,
         tests_skipped: 0,
-        duration_ms_sum: 0,
+        duration_ms_cumulative: 0,
+        duration_ms_wall_clock: 0,
       },
     };
 
     existing.agg.tests_total += 1;
-    existing.agg.duration_ms_sum += result.duration;
+    if (result.status !== "skipped") {
+      existing.agg.tests_executed += 1;
+    }
+    existing.agg.duration_ms_cumulative += result.duration;
 
     if (result.status === "passed") existing.agg.tests_passed += 1;
     else if (result.status === "skipped") existing.agg.tests_skipped += 1;
@@ -138,7 +143,7 @@ class InfluxReporter implements Reporter {
 
     // Per-dimension points
     for (const { key, agg } of this.agg.values()) {
-      const passrate = agg.tests_total > 0 ? (agg.tests_passed / agg.tests_total) * 100 : 0;
+      const passrate = agg.tests_executed > 0 ? (agg.tests_passed / agg.tests_executed) * 100 : 0;
 
       lines.push(
         toLineProtocol({
@@ -153,10 +158,12 @@ class InfluxReporter implements Reporter {
           },
           fields: {
             tests_total: agg.tests_total,
+            tests_executed: agg.tests_executed,
             tests_passed: agg.tests_passed,
             tests_failed: agg.tests_failed,
             tests_skipped: agg.tests_skipped,
-            duration_ms: agg.duration_ms_sum,
+            duration_ms_cumulative: agg.duration_ms_cumulative,
+            duration_ms_wall_clock: nowMs() - this.startedAt,
             passrate,
           },
           timestamp: ts,
@@ -169,13 +176,14 @@ class InfluxReporter implements Reporter {
       const total = Array.from(this.agg.values()).reduce(
         (acc, v) => {
           acc.tests_total += v.agg.tests_total;
+          acc.tests_executed += v.agg.tests_executed;
           acc.tests_passed += v.agg.tests_passed;
           acc.tests_failed += v.agg.tests_failed;
           acc.tests_skipped += v.agg.tests_skipped;
-          acc.duration_ms_sum += v.agg.duration_ms_sum;
+          acc.duration_ms_cumulative += v.agg.duration_ms_cumulative;
           return acc;
         },
-        { tests_total: 0, tests_passed: 0, tests_failed: 0, tests_skipped: 0, duration_ms_sum: 0 }
+        { tests_total: 0, tests_executed: 0, tests_passed: 0, tests_failed: 0, tests_skipped: 0, duration_ms_cumulative: 0 }
       );
 
       const passrate = total.tests_total > 0 ? (total.tests_passed / total.tests_total) * 100 : 0;
@@ -187,10 +195,12 @@ class InfluxReporter implements Reporter {
           tags: { app: "__all__", env: this.env, suite: "all", run_id: this.runId },
           fields: {
             tests_total: total.tests_total,
+            tests_executed: total.tests_executed,
             tests_passed: total.tests_passed,
             tests_failed: total.tests_failed,
             tests_skipped: total.tests_skipped,
-            duration_ms: wallClock, // wall clock is often more useful globally
+            duration_ms_cumulative: total.duration_ms_cumulative,
+            duration_ms_wall_clock: wallClock, // wall clock is often more useful globally
             passrate,
             run_started_ms: this.startedAt,
           },

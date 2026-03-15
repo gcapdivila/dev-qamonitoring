@@ -55,38 +55,45 @@ export async function writeLines(lines: string[]): Promise<WriteResult> {
   }
   if (lines.length === 0) return { status: "skipped", reason: "No point generated" };
 
-  const base = cfg.url.replace(/\/$/, "");
-  const body = lines.join("\n");
-  const mode = resolveMode(cfg);
+  try {
+    const base = cfg.url.replace(/\/$/, "");
+    const body = lines.join("\n");
+    const mode = resolveMode(cfg);
 
-  if (mode === "1") {
-    if (!cfg.db) {
-      return { status: "skipped", reason: "INFLUX_DB missing for Influx 1.x" };;
+    if (mode === "1") {
+      if (!cfg.db) {
+        return { status: "skipped", reason: "INFLUX_DB missing for Influx 1.x" };;
+      }
+      const params = new URLSearchParams({ db: cfg.db, precision: cfg.precision });
+      if (cfg.rp) params.set("rp", cfg.rp);
+      if (cfg.user) params.set("u", cfg.user);
+      if (cfg.pass) params.set("p", cfg.pass);
+
+      const url = `${base}/write?${params.toString()}`;
+      await postText(url, body, { "Content-Type": "text/plain; charset=utf-8" });
+      return { status: "pushed" };
     }
-    const params = new URLSearchParams({ db: cfg.db, precision: cfg.precision });
-    if (cfg.rp) params.set("rp", cfg.rp);
-    if (cfg.user) params.set("u", cfg.user);
-    if (cfg.pass) params.set("p", cfg.pass);
 
-    const url = `${base}/write?${params.toString()}`;
-    await postText(url, body, { "Content-Type": "text/plain; charset=utf-8" });
+    // Influx 2.x
+    if (!cfg.org || !cfg.bucket || !cfg.token) {
+      return { status: "skipped", reason: "INFLUX_ORG/BUCKET/TOKEN missing for Influx 2.x" };
+    }
+    const params = new URLSearchParams({
+      org: cfg.org,
+      bucket: cfg.bucket,
+      precision: cfg.precision,
+    });
+    const url = `${base}/api/v2/write?${params.toString()}`;
+    await postText(url, body, {
+      "Content-Type": "text/plain; charset=utf-8",
+      Authorization: `Token ${cfg.token}`,
+    });
+    
     return { status: "pushed" };
-  }
-
-  // Influx 2.x
-  if (!cfg.org || !cfg.bucket || !cfg.token) {
-    return { status: "skipped", reason: "INFLUX_ORG/BUCKET/TOKEN missing for Influx 2.x" };
-  }
-  const params = new URLSearchParams({
-    org: cfg.org,
-    bucket: cfg.bucket,
-    precision: cfg.precision,
-  });
-  const url = `${base}/api/v2/write?${params.toString()}`;
-  await postText(url, body, {
-    "Content-Type": "text/plain; charset=utf-8",
-    Authorization: `Token ${cfg.token}`,
-  });
   
-  return { status: "pushed" };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[InfluxReporter] Failed to write metrics: ${msg}`);
+    return { status: "skipped", reason: `Write failed: ${msg}`};
+  }    
 }

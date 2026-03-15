@@ -34,10 +34,12 @@ export type RunKey = {
 
 export type Agg = {
   tests_total: number;
+  tests_executed: number;
   tests_passed: number;
   tests_failed: number;
   tests_skipped: number;
-  duration_ms_sum: number; // sum of individual test durations
+  duration_ms_cumulative: number;
+  duration_ms_wall_clock?: number;
 };
 
 export type TagDims = {

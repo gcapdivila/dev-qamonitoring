@@ -36,7 +36,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.40.0"
@@ -44,5 +46,8 @@
   "dependencies": {
     "dotenv": "^17.2.3"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^4.1.0"
+  }
 }
