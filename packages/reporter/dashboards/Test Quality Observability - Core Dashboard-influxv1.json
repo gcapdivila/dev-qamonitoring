@@ -1,0 +1,5043 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB1",
+      "label": "influxdb1",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "barchart",
+      "name": "Bar chart",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "bargauge",
+      "name": "Bar gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.3.1"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Core run-level observability dashboard for test quality monitoring using InfluxDB v1.\nDesigned for aggregated metrics per run (no per-test storage).",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 38,
+      "panels": [],
+      "title": "🧭 Last Run In Selected Timeframe",
+      "type": "row"
+    },
+    {
+      "gridPos": {
+        "h": 9,
+        "w": 3,
+        "x": 0,
+        "y": 1
+      },
+      "id": 44,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# Last run in selected timeframe\n---\nMetrics for the most recent test run observed within the selected time range.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "12.3.1",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "transparent",
+            "mode": "fixed"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "#808080",
+                  "index": 0
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "noValue": "No run in selected timeframe",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 6,
+        "x": 3,
+        "y": 1
+      },
+      "id": 39,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^$measurement\\.env$/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 30
+        },
+        "textMode": "value",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "groupBy": [],
+          "hide": false,
+          "measurement": "$measurement",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "Select * from (\n  SELECT LAST(\"duration_ms\") AS \"duration_ms\"\n  FROM \"$measurement\"\n  WHERE \"env\" =~ /^$env$/ AND $timeFilter\n  GROUP BY \"env\"\n)\norder by time desc\nlimit 1",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration_ms"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "env::tag",
+              "operator": "=~",
+              "value": "/^$env$/"
+            }
+          ]
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "No run in selected timeframe",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "dateTimeAsLocal"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 12,
+        "x": 9,
+        "y": 1
+      },
+      "id": 40,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^Time$/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 30
+        },
+        "textMode": "value",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "query": "SELECT LAST(\"duration_ms\") AS \"duration_ms\"\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/ AND $timeFilter\nORDER BY time DESC\nLIMIT 1",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "description": "Last passrate for the full run (app=__all__, suite=all).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "displayName": "Global Passrate",
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "#808080",
+                  "index": 0
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "noValue": "No run in selected timeframe",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 75
+              },
+              {
+                "color": "yellow",
+                "value": 90
+              },
+              {
+                "color": "green",
+                "value": 95
+              },
+              {
+                "color": "dark-green",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 3,
+        "y": 2
+      },
+      "id": 32,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "hide": false,
+          "query": "SELECT \"passrate\" FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_timeframe' AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "displayName": "Total number of Tests",
+          "fieldMinMax": false,
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "#808080",
+                  "index": 0
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "noValue": "No run in selected timeframe",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "$measurement.last"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 9,
+        "y": 2
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "query": "SELECT last(\"tests_total\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ AND \"run_id\" = '$run_id_timeframe' AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "displayName": "Number of executed tests",
+          "fieldMinMax": false,
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "#808080",
+                  "index": 0
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "noValue": "No run in selected timeframe",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "$measurement.last"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 13,
+        "y": 2
+      },
+      "id": 42,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "tests_total",
+          "query": "SELECT last(\"tests_total\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ AND \"run_id\" = '$run_id_timeframe' AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "alias": "tests_skipped",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT last(\"tests_skipped\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ AND \"run_id\" = '$run_id_timeframe' AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_total"
+                }
+              },
+              "operator": "-",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_skipped"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "#808080",
+                  "index": 0
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "noValue": "No run in selected timeframe",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Success"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failures"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 17,
+        "y": 2
+      },
+      "id": 35,
+      "options": {
+        "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "Success",
+          "query": "SELECT last(\"tests_passed\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ AND \"run_id\" = '$run_id_timeframe' AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "alias": "Failures",
+          "query": "SELECT last(\"tests_failed\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ AND \"run_id\" = '$run_id_timeframe' AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "alias": "Skips",
+          "query": "SELECT last(\"tests_skipped\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ AND \"run_id\" = '$run_id_timeframe' AND $timeFilter)",
+          "rawQuery": true,
+          "refId": "C",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "description": "Total time consumption with parallel execution",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "decimals": 1,
+          "displayName": "Execution duration",
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "#808080",
+                  "index": 0
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "noValue": "No run in selected timeframe",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 9,
+        "y": 6
+      },
+      "id": 33,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "query": "SELECT last(\"duration_ms\")\nFROM \"$measurement\"\nWHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ AND \"run_id\" = '$run_id_timeframe' AND $timeFilter\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "#808080",
+                  "index": 0
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "noValue": "No run in selected timeframe",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 13,
+        "y": 6
+      },
+      "id": 36,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "duration_ms",
+          "query": "SELECT SUM(\"duration_ms\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_timeframe'\n  AND \"suite\" != 'all'\n  AND $timeFilter\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "alias": "tests_total",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT SUM(\"tests_total\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_timeframe'\n  AND \"suite\" != 'all'\n  AND $timeFilter\n",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series"
+        },
+        {
+          "alias": "tests_skipped",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT SUM(\"tests_skipped\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_timeframe'\n  AND \"suite\" != 'all'\n  AND $timeFilter\n",
+          "rawQuery": true,
+          "refId": "C",
+          "resultFormat": "time_series"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Time",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_total"
+                }
+              },
+              "operator": "-",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_skipped"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Avg test duration (run)",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "duration_ms"
+                }
+              },
+              "operator": "/",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_total - tests_skipped"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 48,
+      "panels": [],
+      "title": "📋 Recent Runs",
+      "type": "row"
+    },
+    {
+      "gridPos": {
+        "h": 9,
+        "w": 3,
+        "x": 0,
+        "y": 11
+      },
+      "id": 64,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# Recent runs\n---\nChronological view of recent test runs to monitor stability and execution trends over time.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "12.3.1",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 75
+              },
+              {
+                "color": "yellow",
+                "value": 90
+              },
+              {
+                "color": "green",
+                "value": 95
+              },
+              {
+                "color": "dark-green",
+                "value": 100
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Passrate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "basic",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 172
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Execution Duration"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Environment"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 185
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Run ID"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 360
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 18,
+        "x": 3,
+        "y": 11
+      },
+      "id": 47,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "query": "SELECT * FROM \"$measurement\" WHERE \"app\" = '__all__' AND \"env\" =~ /^$env$/ GROUP BY \"run_id\" ORDER BY time DESC LIMIT 20",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Executed Tests",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_total"
+                }
+              },
+              "operator": "-",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_skipped"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "app": true,
+              "domain": true,
+              "run_started_ms": true,
+              "suite": true,
+              "tests_failed": true,
+              "tests_passed": true,
+              "tests_skipped": true,
+              "tests_total": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Executed Tests": 3,
+              "Time": 0,
+              "duration_ms": 5,
+              "env": 2,
+              "passrate": 4,
+              "run_id": 1
+            },
+            "renameByName": {
+              "Executed Tests": "",
+              "duration_ms": "Execution Duration",
+              "env": "Environment",
+              "passrate": "Passrate",
+              "run_id": "Run ID"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 18,
+      "panels": [],
+      "title": "🛰 Absolute Last Run",
+      "type": "row"
+    },
+    {
+      "gridPos": {
+        "h": 9,
+        "w": 3,
+        "x": 0,
+        "y": 21
+      },
+      "id": 43,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# Absolute last run\n---\nAggregated metrics for the most recent completed test run in the selected environment.\nIndependent of the selected time range.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "12.3.1",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "transparent",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 6,
+        "x": 3,
+        "y": 21
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^$measurement\\.env$/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 30
+        },
+        "textMode": "value",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "groupBy": [],
+          "hide": false,
+          "measurement": "$measurement",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "Select * from (\n  SELECT LAST(\"duration_ms\") AS \"duration_ms\"\n  FROM \"$measurement\"\n  WHERE \"env\" =~ /^$env$/\n  GROUP BY \"env\"\n)\norder by time desc\nlimit 1",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration_ms"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "env::tag",
+              "operator": "=~",
+              "value": "/^$env$/"
+            }
+          ]
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "dateTimeAsLocal"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 12,
+        "x": 9,
+        "y": 21
+      },
+      "id": 19,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^Time$/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 30
+        },
+        "textMode": "value",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "query": "SELECT LAST(\"duration_ms\") AS \"duration_ms\"\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\nORDER BY time DESC\nLIMIT 1",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "description": "Last passrate for the full run (app=__all__, suite=all).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "displayName": "Global Passrate",
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 75
+              },
+              {
+                "color": "yellow",
+                "value": 90
+              },
+              {
+                "color": "green",
+                "value": 95
+              },
+              {
+                "color": "dark-green",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 5,
+        "x": 3,
+        "y": 22
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "query": "SELECT last(\"passrate\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_absolute')",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 1,
+        "x": 8,
+        "y": 22
+      },
+      "id": 52,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "percentSize": 10,
+          "titleSize": 10
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "passrate",
+          "query": "SELECT last(\"passrate\") AS passrate FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_absolute') GROUP BY \"env\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "alias": "passrate_previous",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT last(\"passrate\") AS \"passrate_previous\" FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_previous') GROUP By \"env\"",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "env",
+            "mode": "inner"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Δ vs previous",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "passrate"
+                }
+              },
+              "operator": "-",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "passrate_previous"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "include": [
+                "passrate",
+                "passrate_previous"
+              ],
+              "reducer": "delta"
+            },
+            "replaceFields": false,
+            "unary": {
+              "fieldName": "passrate_previous",
+              "operator": "abs"
+            }
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Δ vs previous"
+              ]
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "description": "Total time consumption with parallel execution",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "displayName": "Total number of tests",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 9,
+        "y": 22
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "query": "SELECT last(\"tests_total\")\nFROM \"$measurement\"\nWHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_absolute'\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "description": "Total time consumption with parallel execution",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "displayName": "Number of executed tests",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 13,
+        "y": 22
+      },
+      "id": 41,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "tests_total",
+          "query": "SELECT last(\"tests_total\")\nFROM \"$measurement\"\nWHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_absolute'\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "alias": "tests_skipped",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT last(\"tests_skipped\")\nFROM \"$measurement\"\nWHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_absolute'\n",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_total"
+                }
+              },
+              "operator": "-",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_skipped"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Success"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failures"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 17,
+        "y": 22
+      },
+      "id": 5,
+      "options": {
+        "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "Success",
+          "query": "SELECT last(\"tests_passed\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_absolute')",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "alias": "Failures",
+          "query": "SELECT last(\"tests_failed\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/   AND \"run_id\" = '$run_id_absolute')",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "alias": "Skips",
+          "query": "SELECT last(\"tests_skipped\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_absolute')",
+          "rawQuery": true,
+          "refId": "C",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "description": "Total time consumption with parallel execution",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "decimals": 1,
+          "displayName": "Execution duration",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 9,
+        "y": 26
+      },
+      "id": 34,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "query": "SELECT last(\"duration_ms\")\nFROM \"$measurement\"\nWHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_absolute'\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 1,
+        "x": 12,
+        "y": 26
+      },
+      "id": 53,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "percentSize": 10,
+          "titleSize": 10
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "duration",
+          "query": "SELECT last(\"duration_ms\") AS \"duration\"\nFROM \"$measurement\"\nWHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_absolute'\nGROUP By \"env\"\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "alias": "duration_previous",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT last(\"duration_ms\") AS \"duration_previous\"\nFROM \"$measurement\"\nWHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/  AND \"run_id\" = '$run_id_previous'\nGROUP BY \"env\"\n",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "env",
+            "mode": "inner"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Δ vs previous",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "duration"
+                }
+              },
+              "operator": "-",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "duration_previous"
+                }
+              }
+            },
+            "cumulative": {
+              "field": "duration",
+              "reducer": "sum"
+            },
+            "index": {
+              "asPercentile": false
+            },
+            "mode": "binary",
+            "reduce": {
+              "include": [
+                "duration",
+                "duration_previous"
+              ],
+              "reducer": "distinctCount"
+            },
+            "replaceFields": false,
+            "window": {
+              "field": "duration",
+              "reducer": "variance",
+              "windowAlignment": "trailing",
+              "windowSize": 0.1,
+              "windowSizeMode": "percentage"
+            }
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Δ vs previous"
+              ]
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Delta"
+            },
+            "properties": []
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 13,
+        "y": 26
+      },
+      "id": 31,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": false
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "duration_ms",
+          "query": "SELECT SUM(\"duration_ms\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != 'all'\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "alias": "tests_total",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT SUM(\"tests_total\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != 'all'\n",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series"
+        },
+        {
+          "alias": "tests_skipped",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT SUM(\"tests_skipped\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != 'all'\n",
+          "rawQuery": true,
+          "refId": "C",
+          "resultFormat": "time_series"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Time",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_total"
+                }
+              },
+              "operator": "-",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_skipped"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Avg test duration (run)",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "duration_ms"
+                }
+              },
+              "operator": "/",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_total - tests_skipped"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 1,
+        "x": 16,
+        "y": 26
+      },
+      "id": 51,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "percentSize": 10,
+          "titleSize": 10
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "duration_ms",
+          "query": "SELECT SUM(\"duration_ms\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != 'all'\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "alias": "tests_total",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT SUM(\"tests_total\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != 'all'\n",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series"
+        },
+        {
+          "alias": "tests_skipped",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT SUM(\"tests_skipped\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != 'all'\n",
+          "rawQuery": true,
+          "refId": "C",
+          "resultFormat": "time_series"
+        },
+        {
+          "alias": "duration_previous",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT SUM(\"duration_ms\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_previous'\n  AND \"suite\" != 'all'\n",
+          "rawQuery": true,
+          "refId": "D",
+          "resultFormat": "time_series"
+        },
+        {
+          "alias": "tests_total_previous",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT SUM(\"tests_total\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_previous'\n  AND \"suite\" != 'all'\n",
+          "rawQuery": true,
+          "refId": "E",
+          "resultFormat": "time_series"
+        },
+        {
+          "alias": "tests_skipped_previous",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "hide": false,
+          "query": "SELECT SUM(\"tests_skipped\")\nFROM \"$measurement\"\nWHERE \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_previous'\n  AND \"suite\" != 'all'\n",
+          "rawQuery": true,
+          "refId": "F",
+          "resultFormat": "time_series"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Time",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_total"
+                }
+              },
+              "operator": "-",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_skipped"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Avg test duration (run)",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "duration_ms"
+                }
+              },
+              "operator": "/",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_total - tests_skipped"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_total_previous"
+                }
+              },
+              "operator": "-",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_skipped_previous"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Avg test duration (previous)",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "duration_previous"
+                }
+              },
+              "operator": "/",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "tests_total_previous - tests_skipped_previous"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Δ vs previous",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg test duration (run)"
+                }
+              },
+              "operator": "-",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg test duration (previous)"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Δ vs previous"
+              ]
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "id": 10,
+      "panels": [],
+      "title": "📈 Trends",
+      "type": "row"
+    },
+    {
+      "gridPos": {
+        "h": 15,
+        "w": 3,
+        "x": 0,
+        "y": 31
+      },
+      "id": 46,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# Trends over time\n---\nEach data point represents one completed test run in the selected environment.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "12.3.1",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 9,
+        "x": 3,
+        "y": 31
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "query": "SELECT mean(\"passrate\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ AND $timeFilter) GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "query": "SELECT mean(\"passrate\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='critical' AND \"env\" =~ /^$env$/ AND $timeFilter) GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        },
+        {
+          "query": "SELECT mean(\"passrate\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='regression' AND \"env\" =~ /^$env$/ AND $timeFilter) GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "C",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "title": "Passrate evolution",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 1,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 9,
+        "x": 12,
+        "y": 31
+      },
+      "id": 15,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "$measurement",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"duration_ms\")\nFROM \"$measurement\"\nWHERE \"app\" = '__all__'\n  AND \"suite\"='all'\n  AND \"env\" =~ /^$env$/\nGROUP BY time($__interval)\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration_ms"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [],
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "title": "Execution duration",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 9,
+        "x": 3,
+        "y": 39
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "query": "SELECT MEAN(\"ms_per_test\") AS \"ms_per_test\"\nFROM (\n  SELECT\n    SUM(\"duration_ms\") / (SUM(\"tests_total\") - SUM(\"tests_skipped\")) AS \"ms_per_test\"\n  FROM \"$measurement\"\n  WHERE \"env\" =~ /^$env$/\n    AND \"suite\" != 'all'\n    AND \"app\"  != '__all__'\n    AND $timeFilter\n  GROUP BY \"run_id\"\n)\nGROUP BY time($__interval) fill(null)\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "title": "Average durage per test",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB1}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "stepAfter",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 9,
+        "x": 12,
+        "y": 39
+      },
+      "id": 45,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "query": "SELECT mean(\"tests_total\") FROM \"$measurement\" WHERE (\"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ AND $timeFilter) GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          }
+        }
+      ],
+      "title": "Number of executed tests",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "id": 54,
+      "panels": [
+        {
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 3,
+            "x": 0,
+            "y": 47
+          },
+          "id": 62,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "# Breakdown by suite\n---\nAggregated metrics per test suite for the most recent completed run.",
+            "mode": "markdown"
+          },
+          "pluginVersion": "12.3.1",
+          "title": "",
+          "transparent": true,
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Passrate"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 95
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Duration"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 97
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Failed"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "thresholds"
+                    }
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "mode": "gradient",
+                      "type": "color-background"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "transparent",
+                          "value": 0
+                        },
+                        {
+                          "color": "red",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Average test duration"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 174
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Passed"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 98
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Skipped"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 111
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "suite"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 176
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 18,
+            "x": 3,
+            "y": 47
+          },
+          "id": 55,
+          "options": {
+            "cellHeight": "sm",
+            "frameIndex": 0,
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "query": "SELECT\n  SUM(\"tests_passed\")   AS \"Passed\",\n  SUM(\"tests_failed\")  AS \"Failed\",\n  SUM(\"tests_skipped\")  AS \"Skipped\",\n  SUM(\"duration_ms\")    AS \"Duration\"\nFROM \"$measurement\"\nWHERE\n\"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != '__all__'\n  AND \"suite\" != 'all'\nGROUP BY \"suite\"",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "table",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_INFLUXDB1}"
+              }
+            }
+          ],
+          "title": "Suites overview",
+          "transformations": [
+            {
+              "id": "calculateField",
+              "options": {
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed"
+                    }
+                  },
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Failed"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Average test duration",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Duration"
+                    }
+                  },
+                  "operator": "/",
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed + Failed"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Passrate",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed"
+                    }
+                  },
+                  "operator": "/",
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed + Failed"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                },
+                "window": {
+                  "reducer": "mean",
+                  "windowAlignment": "trailing",
+                  "windowSize": 0.1,
+                  "windowSizeMode": "percentage"
+                }
+              }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "suite",
+                    "Passed",
+                    "Failed",
+                    "Skipped",
+                    "Duration",
+                    "Passrate",
+                    "Average test duration"
+                  ]
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "light-blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "left",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 9,
+            "x": 3,
+            "y": 57
+          },
+          "id": 56,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.97,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "always",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "none",
+              "sort": "none"
+            },
+            "xField": "suite",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 300
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "alias": "$tag_suite",
+              "query": "SELECT\n  SUM(\"duration_ms\") AS \"duration_ms\"\nFROM \"$measurement\"\nWHERE\n  \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != '__all__'\n  AND \"suite\" != 'all'\nGROUP BY \"suite\"",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "table",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_INFLUXDB1}"
+              }
+            }
+          ],
+          "title": "Execution time by suite",
+          "transformations": [
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "duration_ms"
+                  }
+                ]
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "light-red",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "left",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "👌 All good here. There was no failures during the run.",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 9,
+            "x": 12,
+            "y": 57
+          },
+          "id": 57,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.97,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "none",
+              "sort": "none"
+            },
+            "xField": "suite",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 300
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "alias": "$tag_suite",
+              "query": "SELECT\n  SUM(\"tests_failed\") AS \"failures\"\nFROM \"$measurement\"\nWHERE\n  \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != '__all__'\n  AND \"suite\" != 'all'\nGROUP BY \"suite\"",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "table",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_INFLUXDB1}"
+              }
+            }
+          ],
+          "title": "Failures by suite",
+          "transformations": [
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "failures"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "filterByValue",
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "lowerOrEqual",
+                      "options": {
+                        "value": "0"
+                      }
+                    },
+                    "fieldName": "failures"
+                  }
+                ],
+                "match": "any",
+                "type": "exclude"
+              }
+            }
+          ],
+          "type": "barchart"
+        }
+      ],
+      "title": "📊 Breakdown By Suite",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 47
+      },
+      "id": 61,
+      "panels": [
+        {
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 3,
+            "x": 0,
+            "y": 68
+          },
+          "id": 63,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "# Breakdown by app\n---\nMetrics aggregated per application for the most recent completed run.",
+            "mode": "markdown"
+          },
+          "pluginVersion": "12.3.1",
+          "title": "",
+          "transparent": true,
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Passrate"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 86
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Duration"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 97
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Failed"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "thresholds"
+                    }
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "mode": "gradient",
+                      "type": "color-background"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "transparent",
+                          "value": 0
+                        },
+                        {
+                          "color": "red",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Average test duration"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 174
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Passed"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 98
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Skipped"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 111
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "suite"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 176
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "domain"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 173
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 18,
+            "x": 3,
+            "y": 68
+          },
+          "id": 58,
+          "options": {
+            "cellHeight": "sm",
+            "frameIndex": 0,
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "query": "SELECT\n  SUM(\"tests_passed\")   AS \"Passed\",\n  SUM(\"tests_failed\")  AS \"Failed\",\n  SUM(\"tests_skipped\")  AS \"Skipped\",\n  SUM(\"duration_ms\")    AS \"Duration\"\nFROM \"$measurement\"\nWHERE\n\"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != '__all__'\n  AND \"suite\" != 'all'\nGROUP BY \"domain\"",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "table",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_INFLUXDB1}"
+              }
+            }
+          ],
+          "title": "Domains overview",
+          "transformations": [
+            {
+              "id": "calculateField",
+              "options": {
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed"
+                    }
+                  },
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Failed"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Average test duration",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Duration"
+                    }
+                  },
+                  "operator": "/",
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed + Failed"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Passrate",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed"
+                    }
+                  },
+                  "operator": "/",
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed + Failed"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                },
+                "window": {
+                  "reducer": "mean",
+                  "windowAlignment": "trailing",
+                  "windowSize": 0.1,
+                  "windowSizeMode": "percentage"
+                }
+              }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "Passed",
+                    "Failed",
+                    "Skipped",
+                    "Duration",
+                    "Average test duration",
+                    "Passrate",
+                    "domain"
+                  ]
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "light-blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "left",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 9,
+            "x": 3,
+            "y": 78
+          },
+          "id": 59,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.97,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "always",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "none",
+              "sort": "none"
+            },
+            "xField": "suite",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 300
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "alias": "",
+              "query": "SELECT\n  SUM(\"duration_ms\") AS \"duration_ms\"\nFROM \"$measurement\"\nWHERE\n  \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != '__all__'\n  AND \"suite\" != 'all'\nGROUP BY \"domain\"",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "table",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_INFLUXDB1}"
+              }
+            }
+          ],
+          "title": "Execution time by domain",
+          "transformations": [
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "duration_ms"
+                  }
+                ]
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "light-red",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "left",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "👌 All good here. There was no failures during the run.",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 9,
+            "x": 12,
+            "y": 78
+          },
+          "id": 60,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.97,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "none",
+              "sort": "none"
+            },
+            "xField": "suite",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 300
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "alias": "",
+              "query": "SELECT\n  SUM(\"tests_failed\") AS \"failures\"\nFROM \"$measurement\"\nWHERE\n  \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != '__all__'\n  AND \"suite\" != 'all'\nGROUP BY \"domain\"",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "table",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_INFLUXDB1}"
+              }
+            }
+          ],
+          "title": "Failures by domain",
+          "transformations": [
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "failures"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "filterByValue",
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "lowerOrEqual",
+                      "options": {
+                        "value": "0"
+                      }
+                    },
+                    "fieldName": "failures"
+                  }
+                ],
+                "match": "any",
+                "type": "exclude"
+              }
+            }
+          ],
+          "type": "barchart"
+        }
+      ],
+      "title": "🧩 Breakdown by domain",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "id": 65,
+      "panels": [
+        {
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 3,
+            "x": 0,
+            "y": 89
+          },
+          "id": 66,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "# Breakdown by domain (all suites)\n---\nAggregated metrics per functional domain for the most recent completed run.\n\nDurations represent cumulative test execution time across all suites.",
+            "mode": "markdown"
+          },
+          "pluginVersion": "12.3.1",
+          "title": "",
+          "transparent": true,
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Passrate"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 86
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Duration"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 97
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Failed"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "thresholds"
+                    }
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "mode": "gradient",
+                      "type": "color-background"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "transparent",
+                          "value": 0
+                        },
+                        {
+                          "color": "red",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Average test duration"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 174
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Passed"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 98
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Skipped"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 111
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "suite"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 176
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "domain"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 173
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 18,
+            "x": 3,
+            "y": 89
+          },
+          "id": 67,
+          "options": {
+            "cellHeight": "sm",
+            "frameIndex": 0,
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "query": "SELECT\n  SUM(\"tests_passed\")   AS \"Passed\",\n  SUM(\"tests_failed\")  AS \"Failed\",\n  SUM(\"tests_skipped\")  AS \"Skipped\",\n  SUM(\"duration_ms\")    AS \"Duration\"\nFROM \"$measurement\"\nWHERE\n\"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != '__all__'\n  AND \"suite\" != 'all'\nGROUP BY \"app\"",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "table",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_INFLUXDB1}"
+              }
+            }
+          ],
+          "title": "Apps overview",
+          "transformations": [
+            {
+              "id": "calculateField",
+              "options": {
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed"
+                    }
+                  },
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Failed"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Average test duration",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Duration"
+                    }
+                  },
+                  "operator": "/",
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed + Failed"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Passrate",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed"
+                    }
+                  },
+                  "operator": "/",
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed + Failed"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                },
+                "window": {
+                  "reducer": "mean",
+                  "windowAlignment": "trailing",
+                  "windowSize": 0.1,
+                  "windowSizeMode": "percentage"
+                }
+              }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "Passed",
+                    "Failed",
+                    "Skipped",
+                    "Duration",
+                    "Average test duration",
+                    "Passrate",
+                    "app"
+                  ]
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "light-blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "left",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 9,
+            "x": 3,
+            "y": 99
+          },
+          "id": 68,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.97,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "always",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "none",
+              "sort": "none"
+            },
+            "xField": "suite",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 300
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "alias": "",
+              "query": "SELECT\n  SUM(\"duration_ms\") AS \"duration_ms\"\nFROM \"$measurement\"\nWHERE\n  \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != '__all__'\n  AND \"suite\" != 'all'\nGROUP BY \"app\"",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "table",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_INFLUXDB1}"
+              }
+            }
+          ],
+          "title": "Execution time by domain",
+          "transformations": [
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "duration_ms"
+                  }
+                ]
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB1}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "light-red",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "left",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "👌 All good here. There was no failures during the run.",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 9,
+            "x": 12,
+            "y": 99
+          },
+          "id": 69,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.97,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "none",
+              "sort": "none"
+            },
+            "xField": "suite",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 300
+          },
+          "pluginVersion": "12.3.1",
+          "targets": [
+            {
+              "alias": "",
+              "query": "SELECT\n  SUM(\"tests_failed\") AS \"failures\"\nFROM \"$measurement\"\nWHERE\n  \"env\" =~ /^$env$/\n  AND \"run_id\" = '$run_id_absolute'\n  AND \"suite\" != '__all__'\n  AND \"suite\" != 'all'\nGROUP BY \"app\"",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "table",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_INFLUXDB1}"
+              }
+            }
+          ],
+          "title": "Failures by domain",
+          "transformations": [
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "failures"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "filterByValue",
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "lowerOrEqual",
+                      "options": {
+                        "value": "0"
+                      }
+                    },
+                    "fieldName": "failures"
+                  }
+                ],
+                "match": "any",
+                "type": "exclude"
+              }
+            }
+          ],
+          "type": "barchart"
+        }
+      ],
+      "title": "🧱 Breakdown by app",
+      "type": "row"
+    }
+  ],
+  "preload": false,
+  "refresh": "10s",
+  "schemaVersion": 42,
+  "tags": [
+    "test-observability",
+    "test-run",
+    "quality-metrics",
+    "influxdb-v1"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "pw_run",
+          "value": "pw_run"
+        },
+        "name": "measurement",
+        "options": [
+          {
+            "selected": true,
+            "text": "pw_run",
+            "value": "pw_run"
+          }
+        ],
+        "query": "pw_run",
+        "type": "custom"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB1}"
+        },
+        "definition": "SHOW TAG VALUES FROM \"$measurement\" WITH KEY = \"env\"",
+        "includeAll": true,
+        "name": "env",
+        "options": [],
+        "query": {
+          "query": "SHOW TAG VALUES FROM \"$measurement\" WITH KEY = \"env\"",
+          "refId": "InfluxVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB1}"
+        },
+        "definition": "SHOW TAG VALUES FROM \"$measurement\" WITH KEY = \"app\"",
+        "includeAll": true,
+        "multi": true,
+        "name": "app",
+        "options": [],
+        "query": "SHOW TAG VALUES FROM \"$measurement\" WITH KEY = \"app\"",
+        "refresh": 1,
+        "regex": "^(?!__all__$).*$",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB1}"
+        },
+        "definition": "SHOW TAG VALUES FROM \"$measurement\" WITH KEY = \"suite\"",
+        "includeAll": true,
+        "multi": true,
+        "name": "suite",
+        "options": [],
+        "query": {
+          "query": "SHOW TAG VALUES FROM \"$measurement\" WITH KEY = \"suite\"",
+          "refId": "InfluxVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "^(?!all$).*$",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB1}"
+        },
+        "definition": "SHOW TAG VALUES FROM \"$measurement\" WITH KEY = \"domain\"",
+        "includeAll": true,
+        "multi": true,
+        "name": "domain",
+        "options": [],
+        "query": {
+          "query": "SHOW TAG VALUES FROM \"$measurement\" WITH KEY = \"domain\"",
+          "refId": "InfluxVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "^(?!all$).*$",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "7d",
+          "value": "7d"
+        },
+        "includeAll": false,
+        "name": "window",
+        "options": [
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "24h",
+            "value": "24h"
+          },
+          {
+            "selected": true,
+            "text": "7d",
+            "value": "7d"
+          },
+          {
+            "selected": false,
+            "text": "30d",
+            "value": "30d"
+          }
+        ],
+        "query": "1h,6h,24h,7d,30d",
+        "type": "custom"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {},
+        "definition": "SELECT \"run_id\" FROM (SELECT \"duration_ms\" FROM \"$measurement\" WHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ GROUP BY \"run_id\"::tag) ORDER BY time DESC LIMIT 1",
+        "hide": 2,
+        "name": "run_id_absolute",
+        "options": [],
+        "query": {
+          "query": "SELECT \"run_id\" FROM (SELECT \"duration_ms\" FROM \"$measurement\" WHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ GROUP BY \"run_id\"::tag) ORDER BY time DESC LIMIT 1",
+          "refId": "InfluxVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {},
+        "definition": "SELECT \"run_id\" FROM (SELECT \"duration_ms\" FROM \"$measurement\" WHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ GROUP BY \"run_id\"::tag) ORDER BY time DESC LIMIT 1 OFFSET 1",
+        "hide": 2,
+        "name": "run_id_previous",
+        "options": [],
+        "query": {
+          "query": "SELECT \"run_id\" FROM (SELECT \"duration_ms\" FROM \"$measurement\" WHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ GROUP BY \"run_id\"::tag) ORDER BY time DESC LIMIT 1 OFFSET 1",
+          "refId": "InfluxVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {},
+        "definition": "SELECT \"run_id\" FROM (SELECT \"duration_ms\" FROM \"$measurement\" WHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ AND $timeFilter GROUP BY \"run_id\"::tag) ORDER BY time DESC LIMIT 1",
+        "hide": 2,
+        "name": "run_id_timeframe",
+        "options": [],
+        "query": {
+          "query": "SELECT \"run_id\" FROM (SELECT \"duration_ms\" FROM \"$measurement\" WHERE \"app\"='__all__' AND \"suite\"='all' AND \"env\" =~ /^$env$/ AND $timeFilter GROUP BY \"run_id\"::tag) ORDER BY time DESC LIMIT 1",
+          "refId": "InfluxVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 8,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-2d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Test Quality Observability - Core Dashboard",
+  "uid": "adxhtnc",
+  "version": 10,
+  "weekStart": "",
+  "id": null
+}
